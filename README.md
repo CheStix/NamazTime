@@ -1,10 +1,9 @@
 # NamazTime Telegram bot 
 [![Python](https://img.shields.io/badge/python-3-blue)](https://www.python.org/downloads/)
-[![Flask](https://img.shields.io/badge/flask-1.1-blue)](https://flask.palletsprojects.com/en/1.1.x/)
-[![pyTelegramBotAPI](https://img.shields.io/badge/pyTelegramBotAPI-3.6-blue)](https://pypi.org/project/pyTelegramBotAPI/)
+[![pyTelegramBotAPI](https://img.shields.io/badge/aiogram-2.13-blue)](https://docs.aiogram.dev/en/latest/)
 
 Исходный код бота [NamazTime](https://t.me/NamazTimeCheEl_Bot) для мессенджера [Telegram](https://telegram.org/). Бот 
-выдает время обязательных ежедневных молитв (намаз) для муссульман. 
+выдает время обязательных ежедневных молитв (намаз) для мусульман. 
  
  Для работы используются бесплатные API сервисов:
  - [Nominatim](https://nominatim.openstreetmap.org), для получения геопозиции(Python библиотека [GeoPy](https://geopy.readthedocs.io)),
@@ -12,13 +11,20 @@
 
 ## Возможности!
 
-- Бот выводит время намазов для выбранной местности: 
-  - на текущий день, 
+- Время намазов для выбранной местности: 
+  - на текущий день,
   - на следующий день,
-  - на введенную дату.
-
+  - на выбранную дату.
+- Время ближайшего намаза для выбранной местности
 - Поиск местности и установки ее для пользователя.
 
+## Версия 1.1.0
+Начало перехода на асинхронность.
+- Изменена структура проекта
+- pyTelegramBotAPI заменен на aiogram
+- Для выбора даты использована библиотека [aiogram_calendar](https://github.com/noXplode/aiogram_calendar)
+
 ### Todos
-- Получение времени ближайшего следующего намаза
-- Перевести на inline клавиатуру
+- Дальнейший переход на асинхронность
+- Замена requests на aiohttp
+- Работа с БД через асинхронный ORM

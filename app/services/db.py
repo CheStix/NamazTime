@@ -20,7 +20,7 @@ def ensure_connection(func):
 def init_db(conn, force: bool = False):
     """
     Проверяем что нужные таблицы в базе данных существуют, если нет то создаем их
-    :param force: перезадать таблицы
+    :param force: пересоздать таблицы
     :param conn: соединение с базой передаваемое через декоратор
     """
 
@@ -50,6 +50,12 @@ def init_db(conn, force: bool = False):
             FOREIGN KEY (city_id) REFERENCES cities (id)
         )
     ''')
+    # Записываем в  таблицу cities населенный пунк DEFAULT_CITY
+    try:
+        c.execute("""INSERT OR IGNORE INTO cities (city_name, latitude, longitude) 
+                    VALUES (?, ?, ?)""", DEFAULT_CITY)
+    except sqlite3.DatabaseError as e:
+        print('Error: ', e)
 
     conn.commit()
 
@@ -57,7 +63,7 @@ def init_db(conn, force: bool = False):
 @ensure_connection
 def set_user_city(user_id: int, city_id: int, conn):
     """
-    Устанавливаем пользователю в соответствие id выбраного города
+    Устанавливаем пользователю в соответствие id выбранного города
     :param conn: соединение с базой передаваемое через декоратор
     :param user_id: telegram id пользователя
     :param city_id: id города из таблицы cities
@@ -74,7 +80,7 @@ def set_user_city(user_id: int, city_id: int, conn):
 @ensure_connection
 def get_user_city(user_id: int, conn) -> tuple:
     """
-    получаем город с координатами для рользователя
+    получаем город с координатами для пользователя
     :param user_id: telegram id пользователя
     :param conn: соединение с базой передаваемое через декоратор
     :return: tuple (city_name, latitude, longitude)

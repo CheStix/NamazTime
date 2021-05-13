@@ -1,7 +1,7 @@
-from telebot import types
+from aiogram import types
 
 
-def city_confirm_dialog():
+def city_confirm_dialog() -> types.InlineKeyboardMarkup:
     """
     inline диалог подтверждения города
     """
@@ -12,18 +12,17 @@ def city_confirm_dialog():
     return markup
 
 
-def get_main_markup():
+def get_main_markup() -> types.ReplyKeyboardMarkup:
     """
     главная клавиатура бота
     """
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    # next_btn = types.KeyboardButton(text="⏰ Следующий")
+    next_btn = types.KeyboardButton(text="⏰ Следующий")
     today_btn = types.KeyboardButton(text="🕌 Сегодня")
-    tomorrow_btn = types.KeyboardButton(text="🕋 Завтра")
     date_btn = types.KeyboardButton(text='📆 На дату')
+    tomorrow_btn = types.KeyboardButton(text="🕋 Завтра")
     city_btn = types.KeyboardButton(text="🌍 Место")
     help_btn = types.KeyboardButton(text="⁉️Помощь")
-    # markup.add(today_btn, next_btn, tomorrow_btn)
-    markup.add(today_btn, tomorrow_btn)
+    markup.add(today_btn, next_btn, tomorrow_btn)
     markup.add(date_btn, city_btn, help_btn)
     return markup
