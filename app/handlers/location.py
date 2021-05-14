@@ -23,7 +23,7 @@ async def location_start(message: Message):
 
 
 async def location_search(message: Message, state: FSMContext):
-    locations = get_loc_geocode(message.text)
+    locations = await get_loc_geocode(message.text)
     # не найдено локации
     if locations is None:
         msg = 'Ничего не найдено. Проверьте правильность написания пункта, или попробуйте ' \
