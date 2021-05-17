@@ -1,13 +1,12 @@
 from datetime import datetime, timedelta
 
-import requests
-
+from aiohttp import ClientSession
 
 URL_MAIN = 'http://api.aladhan.com/v1/timings'
 NAMAZ = ('Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha')
 
 
-def get_namaz(date: str, lat: float, lon: float) -> dict:
+async def get_namaz(date: str, lat: float, lon: float) -> dict:
     """
     время намазов для местности на дату
     :param date: дата в виде 'DD-MM-YYYY'
@@ -16,16 +15,13 @@ def get_namaz(date: str, lat: float, lon: float) -> dict:
     :return:
     """
     url = f'{URL_MAIN}/{date}?latitude={lat}&longitude={lon}&method=2'
-    try:
-        r = requests.get(url)
-    except:
-        r = None
-    else:
-        r = r.json()['data']['timings']
-    return r
+    async with ClientSession() as session:
+        async with session.get(url) as resp:
+            r = await resp.json()
+    return r['data']['timings']
 
 
-def get_next(timestamp: datetime, lat: float, lon: float) -> tuple:
+async def get_next(timestamp: datetime, lat: float, lon: float) -> tuple:
     """
     время следующего намаза для местности относительно переданного timestamp
     :param timestamp: timestamp времени
@@ -34,14 +30,14 @@ def get_next(timestamp: datetime, lat: float, lon: float) -> tuple:
     :return: tuple (название_намаза, время_намаза, дата_намаза)
     """
     date = timestamp.strftime('%d-%m-%Y')
-    timings = get_namaz(date, lat, lon)
+    timings = await get_namaz(date, lat, lon)
     for k in NAMAZ:
         t = datetime.strptime(f'{timings[k]} {date}', '%H:%M %d-%m-%Y')
         if t > timestamp:
             return k, timings[k], date
     timestamp += timedelta(days=1)
     date = timestamp.strftime('%d-%m-%Y')
-    timings = get_namaz(date, lat, lon)
+    timings = await get_namaz(date, lat, lon)
     return 'Fajr', timings['Fajr'], date
 
 

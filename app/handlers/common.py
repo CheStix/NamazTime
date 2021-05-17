@@ -28,7 +28,7 @@ async def day_handler(message: Message):
     if message.text.startswith('🕋'):
         timestamp += timedelta(days=1)
     date = timestamp.strftime('%d-%m-%Y')
-    timings = get_namaz(date, city[1], city[2])
+    timings = await get_namaz(date, city[1], city[2])
     if timings is None:
         msg = 'Ошибка загрузки данных, попробуйте еще раз.\nСпасибо.'
     else:
@@ -44,7 +44,7 @@ async def date_handler(message: Message):
 async def next_handler(message: Message):
     city = db.get_user_city(message.from_user.id)
     timestamp = message.date
-    namaz = get_next(timestamp, city[1], city[2])
+    namaz = await get_next(timestamp, city[1], city[2])
     msg = msg_templates.get_text_next(city[0].split(",")[0], namaz)
     await message.answer(text=msg, reply_markup=MAIN_MARKUP)
 
@@ -55,7 +55,7 @@ async def process_simple_calendar(callback_query: CallbackQuery, callback_data: 
     if selected:
         city = db.get_user_city(callback_query.from_user.id)
         date = date.strftime('%d-%m-%Y')
-        timings = get_namaz(date, city[1], city[2])
+        timings = await get_namaz(date, city[1], city[2])
         msg_text = msg_templates.get_text_day(city[0].split(',')[0], date, timings)
         await callback_query.message.answer(msg_text, reply_markup=MAIN_MARKUP)
 
