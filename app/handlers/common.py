@@ -16,14 +16,14 @@ MAIN_MARKUP = get_main_markup()
 
 async def cmd_start_help(message: Message, state: FSMContext):
     await state.finish()
-    city = db.get_user_city(message.chat.id)
+    city = await db.get_user_city(message.chat.id)
     msg = msg_templates.get_text_main(message.chat.username, city[0].split(',')[0])
     await message.answer(text=msg, reply_markup=MAIN_MARKUP)
 
 
 async def day_handler(message: Message):
     # обработчик кнопок "🕌 Сегодня" и "🕋 Завтра"
-    city = db.get_user_city(message.from_user.id)
+    city = await db.get_user_city(message.from_user.id)
     timestamp = message.date
     if message.text.startswith('🕋'):
         timestamp += timedelta(days=1)
@@ -42,7 +42,7 @@ async def date_handler(message: Message):
 
 
 async def next_handler(message: Message):
-    city = db.get_user_city(message.from_user.id)
+    city = await db.get_user_city(message.from_user.id)
     timestamp = message.date
     namaz = await get_next(timestamp, city[1], city[2])
     msg = msg_templates.get_text_next(city[0].split(",")[0], namaz)
@@ -53,7 +53,7 @@ async def process_simple_calendar(callback_query: CallbackQuery, callback_data: 
     # выбор даты и выдача времени намаза
     selected, date = await SimpleCalendar().process_selection(callback_query, callback_data)
     if selected:
-        city = db.get_user_city(callback_query.from_user.id)
+        city = await db.get_user_city(callback_query.from_user.id)
         date = date.strftime('%d-%m-%Y')
         timings = await get_namaz(date, city[1], city[2])
         msg_text = msg_templates.get_text_day(city[0].split(',')[0], date, timings)

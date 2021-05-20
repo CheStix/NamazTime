@@ -8,6 +8,7 @@ requests = "*"
 geopy = "*"
 aiogram = "*"
 aiohttp = "*"
+aiosqlite = "*"
 
 [dev-packages]
 

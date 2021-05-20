@@ -46,7 +46,7 @@ async def main():
     await set_commands(bot)
 
     await bot_started(bot)
-    init_db()
+    await init_db()
 
     # Запуск поллинга
     await dp.skip_updates()

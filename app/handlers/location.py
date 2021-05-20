@@ -24,22 +24,22 @@ async def location_start(message: Message):
 
 async def location_search(message: Message, state: FSMContext):
     locations = await get_loc_geocode(message.text)
-    # не найдено локации
-    if locations is None:
-        msg = 'Ничего не найдено. Проверьте правильность написания пункта, или попробуйте ' \
-              'ввести ближайший крупный населенный пункт'
-        await message.answer(msg)
-        return
-    # ошибка во время поиска
-    if not locations:
-        msg = 'Ошибка во время поиска местности, попробуйте еще раз.\n '\
-              'Спасибо'
-        await message.answer(msg)
-        return
     # найдена больше чем одна локация
     if len(locations) > 1:
         msg = 'Найдено несколько вариантов, уточните положение, '\
               'например указав область или страну'
+        await message.answer(msg)
+        return
+    # не найдено локации
+    elif (locations is None) or (len(locations) == 0):
+        msg = 'Ничего не найдено. Проверьте правильность написания пункта, или попробуйте ' \
+              'ввести ближайший крупный населенный пункт'
+        await message.answer(msg)
+        return
+        # ошибка во время поиска
+    elif not locations:
+        msg = 'Ошибка во время поиска местности, попробуйте еще раз.\n ' \
+              'Спасибо'
         await message.answer(msg)
         return
 
@@ -58,9 +58,9 @@ async def location_confirm(call: CallbackQuery, state: FSMContext):
         await SetLocation.waiting_loc_name.set()
     if answer == 'yes':
         location = await state.get_data()
-        db.write_city((location['display_name'], float(location['lat']), float(location['lon'])))
-        city_id = db.get_city_id_by_name(location['display_name'])
-        db.set_user_city(call.message.chat.id, city_id)
+        await db.write_city((location['display_name'], float(location['lat']), float(location['lon'])))
+        city_id = await db.get_city_id_by_name(location['display_name'])
+        await db.set_user_city(call.message.chat.id, city_id)
         msg = f'{call.message.chat.username}, ваше местоположение установленно как ' \
               f'{location["display_name"].split(",")[0]}'
         await call.message.edit_text(msg)
