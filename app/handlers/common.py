@@ -24,7 +24,7 @@ async def cmd_start_help(message: Message, state: FSMContext):
 async def day_handler(message: Message):
     # обработчик кнопок "🕌 Сегодня" и "🕋 Завтра"
     city = await db.get_user_city(message.from_user.id)
-    timestamp = message.date
+    timestamp = message.date + timedelta(hours=city[3])
     if message.text.startswith('🕋'):
         timestamp += timedelta(days=1)
     date = timestamp.strftime('%d-%m-%Y')
@@ -43,7 +43,7 @@ async def date_handler(message: Message):
 
 async def next_handler(message: Message):
     city = await db.get_user_city(message.from_user.id)
-    timestamp = message.date
+    timestamp = message.date + timedelta(hours=city[3])
     namaz = await get_next(timestamp, city[1], city[2])
     msg = msg_templates.get_text_next(city[0].split(",")[0], namaz)
     await message.answer(text=msg, reply_markup=MAIN_MARKUP)

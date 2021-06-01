@@ -4,7 +4,8 @@ import aiosqlite
 DEFAULT_CITY = (
     'Москва, Центральный федеральный округ, Россия',
     55.7504461,
-    37.6174943
+    37.6174943,
+    3
 )
 
 
@@ -38,7 +39,8 @@ async def init_db(conn, force: bool = False):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             city_name TEXT NOT NULL UNIQUE,
             latitude REAL NOT NULL,
-            longitude REAL NOT NULL 
+            longitude REAL NOT NULL,
+            timezone REAL NOT NULL 
         )
     ''')
 
@@ -53,8 +55,8 @@ async def init_db(conn, force: bool = False):
     ''')
     # Записываем в  таблицу cities населенный пунк DEFAULT_CITY
     try:
-        await c.execute("""INSERT OR IGNORE INTO cities (city_name, latitude, longitude) 
-                    VALUES (?, ?, ?)""", DEFAULT_CITY)
+        await c.execute("""INSERT OR IGNORE INTO cities (city_name, latitude, longitude, timezone) 
+                    VALUES (?, ?, ?, ?)""", DEFAULT_CITY)
     except aiosqlite.DatabaseError as e:
         print('Error: ', e)
 
@@ -88,7 +90,7 @@ async def get_user_city(user_id: int, conn) -> tuple:
     """
     c = await conn.cursor()
     await c.execute("""
-                SELECT city_name, latitude, longitude
+                SELECT city_name, latitude, longitude, timezone
                 FROM users
                 inner join cities on cities.id = users.city_id
                 WHERE user_id = ?
@@ -105,7 +107,7 @@ async def get_user_city(user_id: int, conn) -> tuple:
 
 
 @ensure_connection
-async def write_city(data, conn):
+async def write_city(*data, conn):
     """
     Записываем в  таблицу cities населенный пунк с  кортежем data
     :param conn: connection to db
@@ -113,8 +115,8 @@ async def write_city(data, conn):
     """
     c = await conn.cursor()
     try:
-        await c.execute("""INSERT OR IGNORE INTO cities (city_name, latitude, longitude) 
-                    VALUES (?, ?, ?)""", data)
+        await c.execute("""INSERT OR IGNORE INTO cities (city_name, latitude, longitude, timezone) 
+                    VALUES (?, ?, ?, ?)""", data)
     except aiosqlite.DatabaseError as e:
         print('Error: ', e)
     else:

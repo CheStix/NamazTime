@@ -1,7 +1,7 @@
 from geopy.adapters import AioHTTPAdapter
-from geopy.geocoders import Nominatim
+from geopy.geocoders import Nominatim, GeoNames
 
-from config import NOMINATIM_USER_AGENT
+from config import NOMINATIM_USER_AGENT, GEONAMES_USERNAME
 
 
 async def get_loc_geocode(address: str) -> list or None:
@@ -24,7 +24,26 @@ async def get_loc_geocode(address: str) -> list or None:
     return locations
 
 
+async def get_loc_timezone(lat: float, lon: float) -> int:
+    """
+
+    :param lat:
+    :param lon:
+    :return:
+    """
+    async with GeoNames(GEONAMES_USERNAME, adapter_factory=AioHTTPAdapter) as locator:
+        try:
+            timezone = await locator.reverse_timezone((lat, lon))
+        except Exception as e:
+            print(e)
+            return False
+        finally:
+            return timezone.raw['rawOffset']
+
+
 if __name__ == '__main__':
     pass
+    # t = asyncio.run(get_loc_timezone(45.401805, -75.699828))
+    # print(t)
     # locations = get_loc_geocode('Москва')
     # print(locations)

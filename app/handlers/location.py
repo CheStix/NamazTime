@@ -7,7 +7,7 @@ from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from .common import cmd_start_help
 from ..keyboards.markups import city_confirm_dialog, get_main_markup
 from ..services import db
-from ..services.map_api import get_loc_geocode
+from ..services.map_api import get_loc_geocode, get_loc_timezone
 
 MAIN_MARKUP = get_main_markup()
 
@@ -24,19 +24,19 @@ async def location_start(message: Message):
 
 async def location_search(message: Message, state: FSMContext):
     locations = await get_loc_geocode(message.text)
-    # найдена больше чем одна локация
-    if len(locations) > 1:
-        msg = 'Найдено несколько вариантов, уточните положение, '\
-              'например указав область или страну'
-        await message.answer(msg)
-        return
     # не найдено локации
-    elif (locations is None) or (len(locations) == 0):
+    if (locations is None) or (len(locations) == 0):
         msg = 'Ничего не найдено. Проверьте правильность написания пункта, или попробуйте ' \
               'ввести ближайший крупный населенный пункт'
         await message.answer(msg)
         return
-        # ошибка во время поиска
+    # найдена больше чем одна локация
+    elif len(locations) > 1:
+        msg = 'Найдено несколько вариантов, уточните положение, ' \
+              'например указав область или страну'
+        await message.answer(msg)
+        return
+    # ошибка во время поиска
     elif not locations:
         msg = 'Ошибка во время поиска местности, попробуйте еще раз.\n ' \
               'Спасибо'
@@ -58,7 +58,10 @@ async def location_confirm(call: CallbackQuery, state: FSMContext):
         await SetLocation.waiting_loc_name.set()
     if answer == 'yes':
         location = await state.get_data()
-        await db.write_city((location['display_name'], float(location['lat']), float(location['lon'])))
+        lat = float(location['lat'])
+        lon = float(location['lon'])
+        timezone = await get_loc_timezone(lat, lon)  #TODO обработать False
+        await db.write_city(location['display_name'], lat, lon, timezone)
         city_id = await db.get_city_id_by_name(location['display_name'])
         await db.set_user_city(call.message.chat.id, city_id)
         msg = f'{call.message.chat.username}, ваше местоположение установленно как ' \
