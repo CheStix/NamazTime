@@ -23,30 +23,29 @@ async def location_start(message: Message):
 
 
 async def location_search(message: Message, state: FSMContext):
-    locations = await get_loc_geocode(message.text)
+    response = await get_loc_geocode(message.text)
     # не найдено локации
-    if (locations is None) or (len(locations) == 0):
+    if response['status'] is None:
         msg = 'Ничего не найдено. Проверьте правильность написания пункта, или попробуйте ' \
               'ввести ближайший крупный населенный пункт'
         await message.answer(msg)
         return
     # найдена больше чем одна локация
-    elif len(locations) > 1:
+    elif response['status'] == 'Multiple':
         msg = 'Найдено несколько вариантов, уточните положение, ' \
               'например указав область или страну'
         await message.answer(msg)
         return
     # ошибка во время поиска
-    elif not locations:
+    elif response['status'] == 'Error':
         msg = 'Ошибка во время поиска местности, попробуйте еще раз.\n ' \
               'Спасибо'
         await message.answer(msg)
         return
 
     markup = city_confirm_dialog()
-    location = locations[0]
-    await state.update_data(location)
-    await message.answer(location['display_name'], reply_markup=markup)
+    await state.update_data(response)
+    await message.answer(response['display_name'], reply_markup=markup)
     await SetLocation.confirm_loc_name.set()
 
 
